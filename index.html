@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2f3136;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            background-color: #36393f;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #7289da;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 12px;
+            border: 1px solid #4f545c;
+            border-radius: 4px;
+            background-color: #2f3136;
+            color: #ffffff;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            background-color: #7289da;
+            color: #ffffff;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #5b6eae;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border: 1px solid #4f545c;
+            border-radius: 4px;
+            background-color: #2f3136;
+            font-size: 16px;
+        }
+        .result a {
+            color: #7289da;
+            text-decoration: none;
+            word-break: break-all;
+            display: block;
+        }
+        .result a:hover {
+            text-decoration: underline;
+        }
+        .error {
+            color: #f04747;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>URL Shortener</h1>
+        <input type="text" id="urlInput" placeholder="Enter your URL here">
+        <button onclick="shortenUrl()">Shorten URL</button>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function generateShortCode() {
+            return Math.random().toString(36).substring(2, 8);
+        }
+
+        function shortenUrl() {
+            const urlInput = document.getElementById('urlInput');
+            const resultDiv = document.getElementById('result');
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                resultDiv.innerHTML = '<span class="error">Please enter a valid URL.</span>';
+                return;
+            }
+
+            const shortCode = generateShortCode();
+            const shortUrl = `${window.location.href}?${shortCode}`;
+
+            // Save to localStorage
+            let urlMapping = JSON.parse(localStorage.getItem('urlMapping')) || {};
+            urlMapping[shortCode] = url;
+            localStorage.setItem('urlMapping', JSON.stringify(urlMapping));
+
+            resultDiv.innerHTML = `Shortened URL: <a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
+            urlInput.value = '';
+        }
+
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const shortCode = urlParams.toString();
+            
+            if (shortCode) {
+                const urlMapping = JSON.parse(localStorage.getItem('urlMapping')) || {};
+                const originalUrl = urlMapping[shortCode];
+
+                if (originalUrl) {
+                    window.location.href = originalUrl;
+                } else {
+                    document.getElementById('result').innerHTML = '<span class="error">Invalid short URL.</span>';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
